@@ -4,315 +4,327 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Detector de Fake News</title>
-  <!-- Fuente pixel Minecraft style -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#000;
-      --accent:#ff0000;
-      --text:#fff;
-      --muted:#bbbbbb;
+      --bg:#f5f9ff;
+      --accent:#6ec1ff;
+      --accent-soft:#e6f3ff;
+      --text:#000;
+      --ok:#2ecc71;
+      --bad:#e74c3c;
+      --glow-ok:0 0 25px rgba(46,204,113,.8);
+      --glow-bad:0 0 25px rgba(231,76,60,.8);
     }
-
+    *{box-sizing:border-box}
     body{
       margin:0;
       font-family:'Press Start 2P', monospace;
       background:var(--bg);
       color:var(--text);
       display:flex;
-      align-items:center;
       justify-content:center;
-      height:100vh;
-      overflow:hidden;
+      min-height:100vh;
     }
 
-    .crt-wrap{
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#000;
-      position:relative;
-    }
-
-    .crt-wrap::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,0,0,0.06) 0px,
-        rgba(255,0,0,0.06) 2px,
-        rgba(0,0,0,0.05) 2px,
-        rgba(0,0,0,0.05) 4px
-      );
-      mix-blend-mode:screen;
-    }
-
-    /* curvatura CRT — Mejoras visuales */
+    /* CONTENEDOR GENERAL */
     .screen{
-      width:960px;
-      max-width:95%;
-      height:600px;
-      background:#000;
-      border:4px solid var(--accent);
-      box-shadow:0 0 40px #ff000020 inset, 0 0 12px #ff000080, 0 0 20px #ff000040;
-      border-radius:14px;
+      width:100%;
+      max-width:1920px;
       padding:16px;
-      position:relative;
-      overflow:hidden;
-      transform:perspective(800px) rotateX(2deg) scale(1.01);
-      animation:crtFlicker 0.12s infinite;
-    }
-
-    @keyframes crtFlicker{
-      0%{opacity:1}
-      50%{opacity:0.97}
-      100%{opacity:1}
     }
 
     header{
       display:flex;
       justify-content:space-between;
+      align-items:center;
+      background:var(--accent-soft);
+      padding:14px;
+      border-radius:14px;
       font-size:12px;
-      margin-bottom:12px;
     }
 
     .stage{
-      display:grid;
-      grid-template-columns:1fr 300px;
-      height:calc(100% - 40px);
-      gap:10px;
+      display:flex;
+      gap:16px;
+      margin-top:16px;
+      width:100%;
     }
 
     .play{
-      border:3px solid var(--accent);
-      border-radius:8px;
       position:relative;
-      overflow:hidden;
-      padding:10px;
-      background:linear-gradient(180deg,#000,#0a0a0a);
+      flex:1;
+      background:#fff;
+      border:3px solid var(--accent);
+      border-radius:18px;
+      min-height:500px;
+      padding:16px;
     }
 
     .headline{
       position:absolute;
-      left:50%;top:50%;transform:translate(-50%,-50%);
-      background:rgba(0,0,0,0.78);
-      padding:14px;
-      max-width:85%;
-      border-radius:6px;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      border:3px solid var(--accent);
+      border-radius:16px;
+      padding:22px;
       text-align:center;
-      font-size:14px;
-      line-height:1.3;
+      width:85%;
+      background:#fff;
+      font-size:15px;
+      line-height:1.6;
+      transition:.2s;
     }
 
-    .timer{height:8px;background:#fff;margin-top:10px;border-radius:4px;overflow:hidden}
-    .timer i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#660000)}
+    .timer{
+      height:10px;
+      margin-top:14px;
+      background:#eee;
+      border-radius:6px;
+      overflow:hidden;
+    }
+
+    .timer i{
+      display:block;
+      height:100%;
+      background:linear-gradient(90deg,var(--accent),#0047ab);
+    }
 
     .panel{
+      width:340px;
       border:3px solid var(--accent);
-      padding:14px;
-      border-radius:10px;
+      border-radius:18px;
+      padding:18px;
+      background:#fff;
       font-size:11px;
-      background:linear-gradient(180deg,#000,#111);
-      box-shadow:0 0 18px #ff000050 inset,0 0 10px #ff000080;
-      text-shadow:none;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
 
     button{
       font-family:'Press Start 2P', monospace;
-      padding:12px;
+      padding:16px;
+      border:none;
+      border-radius:16px;
       width:100%;
-      border-radius:8px;
-      border:2px solid #fff;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
       cursor:pointer;
-      margin-top:8px;
-      letter-spacing:1px;
-      text-shadow:none;
-      transition:0.15s;
+      background:var(--accent);
+      color:#fff;
     }
-    button:hover{transform:scale(1.05);filter:brightness(1.3);}
 
-    .fakeBtn{background:var(--accent);border-color:var(--accent)}
-    .realBtn{background:transparent;border-color:#fff}
+    .fakeBtn{background:var(--bad)}
 
     .overlay{
       position:absolute;
       inset:0;
+      background:#ffffffee;
+      border:3px solid var(--accent);
+      border-radius:18px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      background:rgba(0,0,0,0.92);
       text-align:center;
     }
 
-    .overlay .title{font-size:16px;margin-bottom:10px}
-    .overlay .sub{font-size:10px;color:var(--muted)}
+    .overlay .title{font-size:20px;margin-bottom:14px}
 
-    #tipText{font-size:14px;color:#ff6666;margin-top:8px;display:block;text-shadow:none;}
-</style>
+    #tipText{font-size:12px}
+
+    footer{
+      margin-top:14px;
+      text-align:center;
+      font-size:9px;
+    }
+
+    /* ===================== */
+    /*  PC – 21:9 / Full HD  */
+    /* ===================== */
+    @media (min-width:1280px) and (min-aspect-ratio:21/9){
+      .screen{max-width:1920px}
+      .play{min-height:560px}
+      .headline{font-size:16px;width:70%}
+      .panel{width:360px;font-size:12px}
+    }
+
+    /* ===================== */
+    /*  CELULAR – 9:16      */
+    /* ===================== */
+    @media (max-width:720px) and (max-aspect-ratio:9/16){
+      header{
+        flex-direction:column;
+        gap:8px;
+        text-align:center;
+        font-size:10px;
+      }
+
+      .stage{
+        flex-direction:column;
+      }
+
+      .play{
+        min-height:360px;
+      }
+
+      .headline{
+        font-size:12px;
+        width:92%;
+        padding:16px;
+        line-height:1.4;
+      }
+
+      .panel{
+        width:100%;
+        font-size:10px;
+      }
+
+      button{
+        padding:14px;
+        font-size:10px;
+      }
+    }
+
+    /* ===================== */
+    /*  ROTACIÓN DE CELU    */
+    /* ===================== */
+    @media (max-width:900px) and (orientation:landscape){
+      .stage{flex-direction:row}
+      .panel{width:280px}
+      .headline{font-size:12px}
+    }
+  </style>
 </head>
 <body>
-  <div class="crt-wrap">
-    <div class="screen">
+<div class="screen">
+  <header>
+    <div>DETECTOR DE FAKE NEWS</div>
+    <div>PUNTAJE ▶ <span id="score">0</span></div>
+  </header>
 
-      <header>
-        <div>DETECTOR DE FAKE NEWS</div>
-        <div>PUNTAJE: <span id="score">0</span></div>
-      </header>
-
-      <div class="stage">
-        <div class="play" id="play">
-
-          <div class="headline" id="headlineBox">
-            <div id="headlineText">PULSÁ EMPEZAR</div>
-            <div class="timer"><i id="bar"></i></div>
-          </div>
-
-          <div class="overlay" id="startOverlay">
-            <div class="title">¿LISTO/A PARA DETECTAR?</div>
-            <div class="sub">F = Fake • V = Verificado</div>
-            <button id="startBtn">EMPEZAR</button>
-          </div>
-
-          <div class="overlay" id="loseOverlay" style="display:none">
-            <div class="title">SEÑAL PERDIDA</div>
-            <div class="sub">Puntaje final: <span id="finalScore">0</span></div>
-            <button id="retryBtn">REINTENTAR</button>
-          </div>
-
-        </div>
-
-        <div class="panel">
-          <div style="font-size:14px; color:#fff; text-shadow:none;"><strong>Velocidad</strong></strong></div>
-          <div id="levelText">Nivel 1 — 10s</div>
-
-          <button class="fakeBtn" id="btnFake">FAKE</button>
-          <button class="realBtn" id="btnReal">VERIFICADO</button>
-
-          <div style="margin-top:14px">Tip:</div>
-          <div id="tipText">—</div>
-        </div>
+  <div class="stage">
+    <div class="play" id="play">
+      <div class="headline" id="headlineBox">
+        <div id="headlineText">TOCÁ EMPEZAR</div>
+        <div class="timer"><i id="bar"></i></div>
       </div>
+
+      <div class="overlay" id="startOverlay">
+        <div class="title">¿LISTA?</div>
+        <div>FAKE o VERIFICADO</div>
+        <button id="startBtn">EMPEZAR</button>
+      </div>
+
+      <div class="overlay" id="loseOverlay" style="display:none">
+        <div class="title">SEÑAL PERDIDA</div>
+        <div>Puntaje: <span id="finalScore">0</span></div>
+        <button id="retryBtn">REINTENTAR</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div><strong>Velocidad</strong></div>
+      <div id="levelText">Nivel 1 — 10s</div>
+      <button class="fakeBtn" id="btnFake">FAKE</button>
+      <button id="btnReal">VERIFICADO</button>
+      <div>Tip:</div>
+      <div id="tipText">—</div>
     </div>
   </div>
 
+  <footer>
+    Juego creado por <a href="https://www.linkedin.com/in/sarah-lee-olivera-a15822346/" target="_blank">Sarah Lee Olivera</a> · sarahleeoliveraok@gmail.com
+  </footer>
+</div>
+
 <script>
-  const realSamples = [
-    'Ministerio lanza nuevo plan nacional de conectividad escolar',
-    'Científicos argentinos desarrollan método para detectar virus en 5 minutos',
-    'ONU alerta sobre incremento global de campañas de desinformación',
-    'Hospital incorpora primer robot quirúrgico de acceso público',
-    'Docentes reciben capacitación digital para combatir noticias falsas',
-    'Estudio muestra que jóvenes verifican más titulares que adultos',
-    'Universidad pública abre laboratorio de IA para análisis de noticias',
-    'Organización internacional financia programa de alfabetización mediática',
-    'Nuevo informe revela caída en cuentas que difunden fake news',
-    'Expertos destacan aumento en chequeo ciudadano durante elecciones',
-    'Desarrollan herramienta open source para detectar manipulación de imágenes',
-    'El CONICET publica estudio sobre impacto de los deepfakes en redes',
-    'Escuelas incorporan talleres de verificación digital en su currículo',
-    'Periodistas crean red colaborativa anti-desinformación',
-    'Campaña nacional promueve chequear antes de compartir',
-    'Se inaugura centro de investigación sobre comunicación digital',
-    'Nueva ley obliga transparencia en publicidad política digital',
-    'Investigadores detectan baja en circulación de titulares engañosos',
-    'Medios públicos lanzan sección dedicada a combatir bulos',
-    'Encuesta indica que 8 de cada 10 argentinos desconfían de cadenas virales'
+  const realSamplesBase=[
+    'El CONICET alerta sobre desinformación en redes',
+    'Universidades lanzan cursos de fact-checking',
+    'Informe internacional advierte sobre deepfakes',
+    'Escuelas incorporan alfabetización mediática',
+    'Periodistas crean red de verificación'
+  ];
+  const realSamples=Array.from({length:200},(_,i)=>realSamplesBase[i%realSamplesBase.length]+` (#${i+1})`);
+  const fakeSamplesBase=[
+    'Una app permite leer la mente con el celular',
+    'Tomar mate cura todas las enfermedades',
+    'El WiFi controla los sueños',
+    'La luna será privatizada en 2027',
+    'Caminar hacia atrás rejuvenece'
+  ];
+  const fakeSamples=Array.from({length:200},(_,i)=>fakeSamplesBase[i%fakeSamplesBase.length]+` (#${i+1})`);
+  const tips=[
+    'Chequeá la fuente',
+    'Desconfiá de títulos exagerados',
+    'Buscá la noticia en otros medios',
+    'Verificá fecha y autor'
   ];
 
-  const fakeSamples = [
-    'Nueva ley obliga a usar guantes para tocar el celular en público',
-    'La cebolla frotada sobre los ojos ahora cura miopía según influencer viral',
-    'Crean app que predice el futuro con 99% de precisión',
-    'El mate activa poderes psíquicos según estudio no revisado',
-    'La NASA confirma que Buenos Aires flotó 3 cm por resonancia',
-    'Nueva dieta promete no necesitar comer nunca más',
-    'Prohíben el helado de chocolate por atraer energías negativas',
-    'Descubren que caminar para atrás rejuvenece 5 años',
-    'Gobierno analiza reemplazar billetes por fichas de arcade',
-    'Científicos aseguran que las plantas pueden enviar mensajes de texto',
-    'Nueva moneda argentina será cuadrada para evitar falsificaciones',
-    'Famoso influencer dice haber visto un duende en Recoleta',
-    'Científicos rusos crean perro que habla solo los martes',
-    'Un algoritmo japonés puede leer pensamientos a través del WiFi',
-    'La Tierra podría detener su rotación durante 3 minutos este año',
-    'Aseguran que ducharse con agua fría aumenta 300% la creatividad',
-    'Nuevo impuesto a bostezar en público generará millones',
-    'Detectan nube con forma de Messi y lo consideran señal divina',
-    'Investigadores afirman que mirar el sol 10 segundos cura estrés',
-    'Ratones en Córdoba aprenden karate según estudio filtrado'
-  ];
-
-  const headlines = Array.from({length:2000},()=>{
-    const isReal = Math.random()>0.5;
+  const headlines=Array.from({length:400},()=>{
+    const isReal=Math.random()>0.5;
     return{
-      text: isReal ? realSamples[Math.floor(Math.random()*realSamples.length)] : fakeSamples[Math.floor(Math.random()*fakeSamples.length)],
+      text:isReal?realSamples[Math.floor(Math.random()*realSamples.length)]:fakeSamples[Math.floor(Math.random()*fakeSamples.length)],
       isReal
-    }
+    };
   });
 
-  const tips = [
-    'Buscá la fuente original antes de compartir.',
-    'Los títulos exagerados suelen ser engañosos.',
-    'Verificá la fecha de publicación.',
-    'Desconfiá de URLs raras o similares a medios conocidos.'
-  ];
+  let score=0,streak=0,level=1,time=10,current=null,timer=null;
+  const hText=document.getElementById('headlineText');
+  const bar=document.getElementById('bar');
+  const scoreEl=document.getElementById('score');
+  const levelEl=document.getElementById('levelText');
+  const tipEl=document.getElementById('tipText');
 
-  let score=0, streak=0, level=1, time=10, current=null, timer=null;
-
-  const hText = document.getElementById('headlineText');
-  const bar = document.getElementById('bar');
-  const scoreEl = document.getElementById('score');
-  const levelEl = document.getElementById('levelText');
-  const tipEl = document.getElementById('tipText');
+  const sndOk=new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
+  const sndBad=new Audio('https://assets.mixkit.co/active_storage/sfx/950/950-preview.mp3');
+  sndOk.volume=0.25;
+  sndBad.volume=0.25;
+  const music=new Audio('https://assets.mixkit.co/active_storage/sfx/1447/1447-preview.mp3');
+  music.loop=true;music.volume=0.3;
 
   function pick(){return headlines[Math.floor(Math.random()*headlines.length)]}
 
   function show(){
-    current = pick();
-    hText.textContent = current.text;
+    current=pick();
+    hText.textContent=current.text;
     bar.style.width='100%';
     bar.style.transition='none';
     void bar.offsetWidth;
     bar.style.transition=`width ${time}s linear`;
     bar.style.width='0%';
-    if(timer)clearTimeout(timer);
-    timer=setTimeout(()=>lose(),time*1000);
+    clearTimeout(timer);
+    timer=setTimeout(lose,time*1000);
   }
 
-  document.getElementById('btnFake').onclick=()=>answer(false);
-  document.getElementById('btnReal').onclick=()=>answer(true);
-
-  window.onkeydown=e=>{
-    if(e.key==='f')answer(false);
-    if(e.key==='v')answer(true);
-    if(e.key==='r')reset();
+  function flash(ok){
+    const box=document.getElementById('headlineBox');
+    box.style.boxShadow=ok?'var(--glow-ok)':'var(--glow-bad)';
+    box.style.borderColor=ok?'var(--ok)':'var(--bad)';
+    setTimeout(()=>{box.style.boxShadow='';box.style.borderColor='var(--accent)'},350);
   }
 
   function answer(r){
     if(!current)return;
     clearTimeout(timer);
     if(r===current.isReal){
-      score++;
-      streak++;
+      sndOk.play();
+      flash(true);
+      score++;streak++;
       scoreEl.textContent=score;
-
-      if(streak%5===0) tipEl.textContent = tips[(streak/5)%tips.length];
-
+      if(streak%5===0) tipEl.textContent=tips[(Math.floor(streak/5)-1)%tips.length];
       if(streak%10===0){
         level++;
-        time=Math.max(2,time-1);
+        time=Math.max(3,time-1);
         levelEl.textContent=`Nivel ${level} — ${time}s`;
       }
-
       show();
-    }else lose();
+    }else{
+      sndBad.play();
+      flash(false);
+      setTimeout(lose,300);
+    }
   }
 
   function lose(){
@@ -320,10 +332,8 @@
     document.getElementById('loseOverlay').style.display='flex';
   }
 
-  document.getElementById('startBtn').onclick=start;
-  document.getElementById('retryBtn').onclick=reset;
-
   function start(){
+    music.play();
     score=0;streak=0;level=1;time=10;
     scoreEl.textContent=0;
     levelEl.textContent='Nivel 1 — 10s';
@@ -333,16 +343,13 @@
     show();
   }
 
-  function reset(){
-    document.getElementById('startOverlay').style.display='flex';
-    document.getElementById('loseOverlay').style.display='none';
-    current=null;
-    clearTimeout(timer);
-  }
+  document.getElementById('btnFake').onclick=()=>answer(false);
+  document.getElementById('btnReal').onclick=()=>answer(true);
+  document.getElementById('startBtn').onclick=start;
+  document.getElementById('retryBtn').onclick=()=>location.reload();
+
+  console.assert(realSamples.length===200,'Debe haber 200 reales');
+  console.assert(fakeSamples.length===200,'Debe haber 200 fake');
 </script>
-  <div style="position:absolute; bottom:6px; width:100%; text-align:center; font-size:9px; color:#ff0000aa; text-shadow:none;">
-    Juego creado por <a href="https://www.linkedin.com/in/sarah-lee-olivera-a15822346/" target="_blank" style="color:#ff4b4b; text-decoration:none;">Sarah Lee Olivera</a> — Contacto: <span style="color:#fff">sarahleeoliveraok@gmail.com</span>
-  </div>
 </body>
 </html>
-
