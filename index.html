@@ -3,20 +3,47 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Detector de Fake News</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <title>Detector de Fake News – NubiWorks Lab</title>
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    :root{
-      --bg:#f5f9ff;
-      --accent:#6ec1ff;
-      --accent-soft:#e6f3ff;
-      --text:#000;
-      --ok:#2ecc71;
-      --bad:#e74c3c;
-      --glow-ok:0 0 25px rgba(46,204,113,.8);
-      --glow-bad:0 0 25px rgba(231,76,60,.8);
+    :root {
+      /* Colores base */
+      --black: #000000;
+      --white: #ffffff;
+      --blue: #0e98d6;
+      --yellow: #ffcd02;
+      --red: #ff0000;
+      --green: #6b8e23;
+      --pink: #ff5eb5;
+
+      /* Tema inicial (claro) */
+      --bg: var(--white);
+      --text: var(--black);
+      --accent: var(--blue);
+      --accent-soft: #e6f3ff;
+      --ok: var(--green);
+      --bad: var(--red);
+      --glow-ok: 0 0 25px rgba(107,142,35,.8);
+      --glow-bad: 0 0 25px rgba(255,0,0,.8);
     }
-    *{box-sizing:border-box}
+
+    body.light-mode {
+      --bg: var(--white);
+      --text: var(--black);
+      --accent-soft: #e6f3ff;
+    }
+
+    body.dark-mode {
+      --bg: var(--black);
+      --text: var(--white);
+      --accent-soft: #111111;
+    }
+
+    *{box-sizing:border-box;}
+
     body{
       margin:0;
       font-family:'Press Start 2P', monospace;
@@ -25,9 +52,9 @@
       display:flex;
       justify-content:center;
       min-height:100vh;
+      transition: background 0.3s, color 0.3s;
     }
 
-    /* CONTENEDOR GENERAL */
     .screen{
       width:100%;
       max-width:1920px;
@@ -42,6 +69,7 @@
       padding:14px;
       border-radius:14px;
       font-size:12px;
+      transition: background 0.3s;
     }
 
     .stage{
@@ -54,11 +82,12 @@
     .play{
       position:relative;
       flex:1;
-      background:#fff;
+      background:var(--bg);
       border:3px solid var(--accent);
       border-radius:18px;
       min-height:500px;
       padding:16px;
+      transition: background 0.3s;
     }
 
     .headline{
@@ -71,10 +100,10 @@
       padding:22px;
       text-align:center;
       width:85%;
-      background:#fff;
+      background:var(--bg);
       font-size:15px;
       line-height:1.6;
-      transition:.2s;
+      transition:.2s, background 0.3s, color 0.3s;
     }
 
     .timer{
@@ -96,11 +125,12 @@
       border:3px solid var(--accent);
       border-radius:18px;
       padding:18px;
-      background:#fff;
+      background:var(--bg);
       font-size:11px;
       display:flex;
       flex-direction:column;
       gap:14px;
+      transition: background 0.3s, color 0.3s;
     }
 
     button{
@@ -111,7 +141,8 @@
       width:100%;
       cursor:pointer;
       background:var(--accent);
-      color:#fff;
+      color:var(--white);
+      transition: background 0.3s, color 0.3s;
     }
 
     .fakeBtn{background:var(--bad)}
@@ -119,7 +150,7 @@
     .overlay{
       position:absolute;
       inset:0;
-      background:#ffffffee;
+      background:var(--bg);
       border:3px solid var(--accent);
       border-radius:18px;
       display:flex;
@@ -127,6 +158,7 @@
       align-items:center;
       justify-content:center;
       text-align:center;
+      transition: background 0.3s, color 0.3s;
     }
 
     .overlay .title{font-size:20px;margin-bottom:14px}
@@ -137,6 +169,7 @@
       margin-top:14px;
       text-align:center;
       font-size:9px;
+      font-family: 'Montserrat', sans-serif;
     }
 
     /* ===================== */
@@ -194,14 +227,64 @@
       .panel{width:280px}
       .headline{font-size:12px}
     }
+
+    /* Toggle modo oscuro */
+    .mode-toggle {
+      margin-top:8px;
+      display:flex;
+      align-items:center;
+      gap:0.5em;
+      font-size:12px;
+      justify-content:center;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width:50px;
+      height:24px;
+    }
+    .switch input {display:none;}
+    .slider {
+      position:absolute;
+      cursor:pointer;
+      top:0; left:0; right:0; bottom:0;
+      background-color: var(--black);
+      transition:.4s;
+      border-radius:34px;
+    }
+    .slider:before{
+      position:absolute;
+      content:"";
+      height:18px; width:18px;
+      left:3px; bottom:3px;
+      background-color: var(--white);
+      transition:.4s;
+      border-radius:50%;
+    }
+    input:checked + .slider{
+      background-color: var(--blue);
+    }
+    input:checked + .slider:before{
+      transform: translateX(26px);
+    }
   </style>
 </head>
-<body>
+
+<body class="light-mode">
 <div class="screen">
   <header>
     <div>DETECTOR DE FAKE NEWS</div>
     <div>PUNTAJE ▶ <span id="score">0</span></div>
   </header>
+
+  <!-- Toggle modo -->
+  <div class="mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="toggleMode">
+      <span class="slider round"></span>
+    </label>
+    <span id="modeText">Modo Claro</span>
+  </div>
 
   <div class="stage">
     <div class="play" id="play">
@@ -237,119 +320,563 @@
     Juego creado por <a href="https://www.linkedin.com/in/sarah-lee-olivera-a15822346/" target="_blank">Sarah Lee Olivera</a> · grafica@ccomusoc.com.ar
   </footer>
 </div>
-
 <script>
-  const realSamplesBase=[
-    'El CONICET alerta sobre desinformación en redes',
-    'Universidades lanzan cursos de fact-checking',
-    'Informe internacional advierte sobre deepfakes',
-    'Escuelas incorporan alfabetización mediática',
-    'Periodistas crean red de verificación'
-  ];
-  const realSamples=Array.from({length:200},(_,i)=>realSamplesBase[i%realSamplesBase.length]+` (#${i+1})`);
-  const fakeSamplesBase=[
-    'Una app permite leer la mente con el celular',
-    'Tomar mate cura todas las enfermedades',
-    'El WiFi controla los sueños',
-    'La luna será privatizada en 2027',
-    'Caminar hacia atrás rejuvenece'
-  ];
-  const fakeSamples=Array.from({length:200},(_,i)=>fakeSamplesBase[i%fakeSamplesBase.length]+` (#${i+1})`);
-  const tips=[
-    'Chequeá la fuente',
-    'Desconfiá de títulos exagerados',
-    'Buscá la noticia en otros medios',
-    'Verificá fecha y autor'
-  ];
-
-  const headlines=Array.from({length:400},()=>{
-    const isReal=Math.random()>0.5;
-    return{
-      text:isReal?realSamples[Math.floor(Math.random()*realSamples.length)]:fakeSamples[Math.floor(Math.random()*fakeSamples.length)],
-      isReal
-    };
+  // Toggle modo oscuro
+  const toggle = document.getElementById('toggleMode');
+  const body = document.body;
+  const modeText = document.getElementById('modeText');
+  toggle.addEventListener('change', ()=>{
+    if(toggle.checked){
+      body.classList.remove('light-mode');
+      body.classList.add('dark-mode');
+      modeText.textContent='Modo Oscuro';
+    }else{
+      body.classList.remove('dark-mode');
+      body.classList.add('light-mode');
+      modeText.textContent='Modo Claro';
+    }
   });
 
-  let score=0,streak=0,level=1,time=10,current=null,timer=null;
-  const hText=document.getElementById('headlineText');
-  const bar=document.getElementById('bar');
-  const scoreEl=document.getElementById('score');
-  const levelEl=document.getElementById('levelText');
-  const tipEl=document.getElementById('tipText');
+  // ====== Noticias y tips ======
+  const realNews = [
+   'El CONICET alerta sobre desinformación en redes',
+   'Universidades lanzan cursos de fact-checking',
+   'Informe internacional advierte sobre deepfakes',
+   'Escuelas incorporan alfabetización mediática',
+   'Periodistas crean red de verificación',
+   'Campañas educativas promueven noticias confiables',
+   'Gobierno impulsa programas de alfabetización digital',
+   'Se lanza observatorio de noticias falsas',
+   'Estudiantes participan en talleres de verificación',
+   'Medios locales crean secciones de fact-checking',
+   'Investigadores publican guías contra desinformación',
+   'Alumnos debaten sobre ética en redes sociales',
+   'Organizaciones internacionales promueven educación mediática',
+   'Periodistas capacitan a jóvenes en verificación de datos',
+   'Institutos tecnológicos desarrollan herramientas anti-fake',
+   'ONGs alertan sobre manipulación en redes',
+   'Campañas de concientización llegan a escuelas rurales',
+   'Universidades crean cursos sobre alfabetización mediática',
+   'Expertos en comunicación estudian fenómenos de desinformación',
+   'Prensa científica lanza boletines sobre noticias verificadas',
+   'Talleres de fact-checking para docentes',
+   'Conferencias sobre ética digital en universidades',
+   'Investigaciones revelan el impacto de las fake news',
+   'Redes sociales implementan filtros de noticias falsas',
+   'Medios de comunicación firman pacto por la veracidad',
+   'Proyectos de jóvenes fomentan la lectura crítica',
+   'Cursos online enseñan a detectar noticias falsas',
+   'Estudios muestran cómo identificar deepfakes',
+   'Organizaciones lanzan alertas de desinformación',
+   'Periodistas crean manuales de verificación',
+   'Alumnos realizan prácticas de fact-checking',
+   'Gobierno publica recomendaciones sobre información confiable',
+   'Campañas educativas incluyen alfabetización mediática',
+   'Se desarrollan apps para verificar noticias',
+   'Universidades investigan fenómenos de desinformación',
+   'ONGs ofrecen charlas sobre medios y veracidad',
+   'Prensa internacional colabora con fact-checkers locales',
+   'Se detectan tendencias de desinformación en redes',
+   'Jóvenes participan en concursos de verificación',
+   'Institutos tecnológicos implementan IA para detectar fake news',
+   'Medios digitales crean secciones de verificación rápida',
+   'Conferencias sobre ética digital y comunicación',
+   'Proyectos escolares enseñan a contrastar fuentes',
+   'Publicaciones científicas alertan sobre desinformación',
+   'Periodistas analizan patrones de noticias falsas',
+   'Gobierno lanza campañas de concientización',
+   'Talleres en universidades sobre alfabetización digital',
+   'Se promueve lectura crítica entre adolescentes',
+   'ONGs elaboran guías sobre veracidad en medios',
+   'Estudiantes participan en debates sobre noticias falsas',
+   'Se desarrollan algoritmos para detectar manipulación de información',
+   'Medios locales crean plataformas de fact-checking',
+   'Investigadores estudian la propagación de fake news',
+   'Universidades promueven la educación mediática',
+   'Campañas educativas alertan sobre información engañosa',
+   'Prensa científica publica boletines verificados',
+   'Periodistas dictan talleres sobre ética digital',
+   'Alumnos realizan prácticas de verificación de noticias',
+   'Gobierno impulsa programas de educación digital',
+   'Redes sociales aplican filtros para evitar fake news',
+   'Organizaciones internacionales promueven alfabetización mediática',
+   'Se realizan estudios sobre impacto de noticias falsas',
+   'Medios colaboran con plataformas de fact-checking',
+   'Talleres de comunicación digital para jóvenes',
+   'Cursos virtuales enseñan a identificar desinformación',
+   'Investigaciones muestran técnicas de verificación',
+   'ONGs lanzan alertas sobre desinformación',
+   'Estudiantes crean proyectos de verificación de noticias',
+   'Universidades desarrollan herramientas educativas',
+   'Campañas de concientización incluyen alfabetización mediática',
+   'Prensa internacional difunde noticias verificadas',
+   'Jóvenes participan en competencias de fact-checking',
+   'Medios digitales promueven lectura crítica',
+   'Investigadores publican guías sobre fake news',
+   'Gobierno alerta sobre manipulación informativa',
+   'Se dictan conferencias sobre ética digital y comunicación',
+   'Alumnos aprenden a contrastar fuentes confiables',
+   'Organizaciones elaboran guías educativas',
+   'Talleres de fact-checking en escuelas',
+   'Universidades realizan investigaciones sobre desinformación',
+   'Campañas educativas muestran cómo identificar fake news',
+   'Prensa científica y medios locales colaboran',
+   'Periodistas capacitan sobre verificación de datos',
+   'Estudiantes participan en charlas de alfabetización mediática',
+   'ONGs lanzan programas educativos',
+   'Medios crean boletines de noticias verificadas',
+   'Gobierno implementa políticas de veracidad',
+   'Se desarrollan apps para verificar información',
+   'Universidades promueven la lectura crítica',
+   'Investigadores analizan propagación de desinformación',
+   'Alumnos practican fact-checking en talleres',
+   'Campañas educativas promueven información confiable',
+   'Periodistas crean secciones de verificación rápida',
+   'Jóvenes participan en proyectos educativos',
+   'Medios digitales enseñan a detectar noticias falsas',
+   'ONGs dictan talleres de alfabetización mediática',
+   'Se publican manuales de verificación de noticias',
+   'Estudios muestran cómo identificar noticias engañosas',
+   'Universidades implementan cursos online de fact-checking',
+   'Gobierno lanza alertas sobre noticias falsas',
+   'Periodistas internacionales colaboran en proyectos educativos',
+   'Alumnos participan en concursos de verificación',
+   'Medios digitales implementan filtros de fake news',
+   'ONGs publican guías de alfabetización mediática',
+   'Se realizan talleres sobre ética digital',
+   'Universidades promueven proyectos de fact-checking',
+   'Campañas educativas incluyen lectura crítica',
+   'Prensa científica lanza alertas sobre desinformación',
+   'Periodistas capacitan a jóvenes en veracidad',
+   'Estudiantes aprenden a identificar noticias falsas',
+   'Gobierno publica recomendaciones educativas',
+   'Medios colaboran con universidades en proyectos de fact-checking',
+   'ONGs realizan campañas de concientización',
+   'Alumnos crean herramientas para verificar información',
+   'Universidades desarrollan manuales de verificación',
+   'Campañas educativas muestran cómo detectar desinformación',
+   'Prensa internacional lanza boletines verificados',
+   'Periodistas dictan talleres de comunicación digital',
+   'Estudiantes participan en prácticas de verificación',
+   'Gobierno promueve educación mediática',
+   'Medios digitales publican noticias verificadas',
+   'ONGs dictan charlas sobre alfabetización mediática',
+   'Se desarrollan algoritmos de detección de fake news',
+   'Universidades promueven talleres de verificación',
+   'Campañas educativas enseñan lectura crítica',
+   'Prensa científica alerta sobre manipulación informativa',
+   'Periodistas crean plataformas de verificación',
+   'Alumnos participan en competencias de fact-checking',
+   'Gobierno lanza alertas de noticias falsas',
+   'Medios colaboran en proyectos educativos',
+   'ONGs promueven la ética digital en escuelas',
+   'Universidades implementan cursos de fact-checking',
+   'Campañas educativas promueven veracidad en medios',
+   'Prensa científica publica boletines confiables',
+   'Periodistas capacitan sobre información confiable',
+   'Estudiantes aprenden a verificar noticias',
+   'Gobierno implementa programas educativos digitales',
+   'Medios digitales crean herramientas de verificación',
+   'ONGs realizan talleres de alfabetización mediática',
+   'Universidades promueven proyectos de información confiable',
+   'Campañas educativas enseñan a identificar fake news',
+   'Prensa internacional alerta sobre desinformación',
+   'Periodistas dictan cursos de veracidad',
+   'Alumnos practican la lectura crítica en talleres',
+   'Gobierno impulsa programas de veracidad',
+   'Medios colaboran con plataformas de fact-checking',
+   'ONGs publican guías de educación mediática',
+   'Universidades desarrollan apps educativas',
+   'Campañas educativas muestran cómo verificar información',
+   'Prensa científica promueve alfabetización digital',
+   'Periodistas enseñan a contrastar fuentes',
+   'Estudiantes crean boletines de noticias verificadas',
+   'Gobierno lanza campañas de concientización',
+   'Medios digitales enseñan técnicas de verificación',
+   'ONGs dictan talleres sobre desinformación',
+   'Universidades publican guías educativas',
+   'Campañas educativas fomentan lectura crítica',
+   'Prensa internacional crea alertas de noticias falsas',
+   'Periodistas capacitan en ética digital',
+   'Alumnos participan en concursos educativos',
+   'Gobierno implementa filtros de noticias falsas',
+   'Medios colaboran en proyectos de alfabetización',
+   'ONGs publican alertas sobre información engañosa',
+   'Universidades desarrollan manuales educativos',
+   'Campañas educativas promueven información confiable',
+   'Prensa científica publica boletines verificados',
+   'Periodistas crean plataformas educativas',
+   'Estudiantes aprenden a identificar fake news',
+   'Gobierno impulsa programas de alfabetización',
+   'Medios digitales enseñan lectura crítica',
+   'ONGs dictan cursos sobre verificación de noticias',
+   'Universidades implementan talleres de fact-checking',
+   'Campañas educativas muestran cómo detectar fake news',
+   'Prensa internacional promueve alfabetización mediática',
+   'Periodistas dictan talleres de comunicación digital',
+   'Alumnos practican fact-checking en proyectos escolares',
+   'Gobierno lanza alertas educativas',
+   'Medios colaboran con universidades para verificación',
+   'ONGs promueven ética digital entre jóvenes',
+   'Universidades desarrollan herramientas de verificación',
+   'Campañas educativas enseñan veracidad en medios',
+   'Prensa científica alerta sobre manipulación en redes',
+   'Periodistas capacitan a estudiantes en fact-checking',
+   'Estudiantes crean herramientas educativas de verificación',
+   'Gobierno impulsa educación digital confiable',
+   'Medios digitales publican noticias verificadas',
+   'ONGs dictan talleres de alfabetización digital',
+   'Universidades promueven proyectos de fact-checking',
+   'Campañas educativas fomentan lectura crítica',
+   'Prensa internacional publica boletines confiables'
+  ];
 
-  const sndOk=new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
-  const sndBad=new Audio('https://assets.mixkit.co/active_storage/sfx/950/950-preview.mp3');
-  sndOk.volume=0.25;
-  sndBad.volume=0.25;
-  const music=new Audio('https://assets.mixkit.co/active_storage/sfx/1447/1447-preview.mp3');
-  music.loop=true;music.volume=0.3;
+  const fakeNews = [
+  'Una app permite leer la mente con el celular',
+  'Tomar mate cura todas las enfermedades',
+  'El WiFi controla los sueños',
+  'La luna será privatizada en 2027',
+  'Caminar hacia atrás rejuvenece',
+  'Los gatos pueden predecir terremotos',
+  'El agua del grifo vuelve invisible',
+  'Comer chocolate aumenta la inteligencia instantáneamente',
+  'Los teléfonos pueden robar tu alma',
+  'El sol será apagado por un botón secreto en 2030',
+  'Se descubrió que los elefantes vuelan por la noche',
+  'Las plantas hablan con WiFi',
+  'Bailar en la oscuridad cura la ceguera',
+  'Los libros antiguos contienen códigos secretos que dan poderes',
+  'Dormir con calcetines de colores cambia tu personalidad',
+  'Las redes sociales son controladas por alienígenas',
+  'Tomar café de noche hace que los fantasmas te sigan',
+  'El oro puede volverse líquido al tocarlo con las manos',
+  'Existen ciudades secretas debajo de Buenos Aires',
+  'Se encontró un portal a otra dimensión en un supermercado',
+  'El chocolate derretido puede detener el tiempo',
+  'Las sombras de las personas son independientes y conscientes',
+  'Comer pizza los martes provoca invisibilidad temporal',
+  'Los espejos muestran universos paralelos por la noche',
+  'La arena del desierto tiene memoria',
+  'Los relojes pueden invertir la edad de quien los usa',
+  'Se descubrió que los perros escriben mensajes secretos',
+  'Los planetas envían señales para comunicarse con humanos',
+  'El viento tiene sabores distintos según el día',
+  'El hielo puede cantar si lo enfrías correctamente',
+  'Las montañas se mueven unos centímetros cada noche',
+  'El agua de lluvia contiene microchips invisibles',
+  'Los árboles guardan secretos de civilizaciones antiguas',
+  'Las monedas mágicas cambian de valor según tu humor',
+  'El cielo puede cambiar de color según tus emociones',
+  'Se descubrió que los peces leen novelas',
+  'Las nubes tienen conciencia y pueden elegir dónde llover',
+  'El arcoíris es un portal secreto a otro mundo',
+  'Las hormigas construyen mini-ciudades subterráneas invisibles',
+  'El chocolate puede hacerte hablar con los animales',
+  'Dormir al revés aumenta tu memoria',
+  'Las palabras escritas en lápiz son mágicas',
+  'Se descubrió un mensaje alienígena en un refresco',
+  'Los fantasmas pueden ser domesticados con música',
+  'El sonido de los relámpagos tiene código secreto',
+  'Comer helado en invierno te da supervelocidad',
+  'Los espejos reflejan vidas pasadas',
+  'Se puede viajar en el tiempo usando un microondas',
+  'Los rayos del sol contienen mensajes secretos',
+  'El aire tiene sabor a chocolate en algunas ciudades',
+  'Las piedras tienen memoria y pueden hablar',
+  'Se descubrió un lenguaje secreto de los gatos',
+  'Las lámparas absorben emociones humanas',
+  'El humo de los cigarrillos cambia la gravedad temporalmente',
+  'Dormir sobre libros antiguos otorga conocimiento instantáneo',
+  'El sonido de la lluvia puede activar poderes especiales',
+  'Las plantas producen música por las noches',
+  'Comer pan tostado al revés cura resfriados',
+  'Los relojes pueden predecir desastres naturales',
+  'Se descubrió que los muebles tienen conciencia',
+  'El viento puede transportarte a otros lugares',
+  'Las sombras de los árboles guardan secretos milenarios',
+  'Beber té con luna llena provoca telepatía',
+  'Los espejos pueden mostrar futuros alternativos',
+  'Se descubrió que los insectos llevan mensajes codificados',
+  'Los ríos cambian de curso según tus emociones',
+  'El chocolate blanco da poderes de invisibilidad temporal',
+  'Dormir con música clásica atrae extraterrestres amigables',
+  'Las paredes registran tus secretos sin que lo notes',
+  'Los pájaros dejan pistas para encontrar tesoros',
+  'Se descubrió que los alimentos tienen conciencia',
+  'Comer verduras en orden alfabético aumenta la memoria',
+  'Las estrellas fugaces cumplen pedidos mágicos',
+  'Los zapatos antiguos te pueden llevar a otro tiempo',
+  'Se encontró un mensaje secreto en un billete de un dólar',
+  'Los gatos pueden abrir portales a otras dimensiones',
+  'Beber agua del grifo de noche provoca visiones',
+  'Las nubes se pueden moldear con la mente',
+  'Dormir con ropa azul aumenta tu creatividad',
+  'Se descubrió que los insectos escuchan tus pensamientos',
+  'Las bicicletas tienen memoria de los caminos recorridos',
+  'Comer sopa mirando el norte atrae buena suerte',
+  'El eco puede repetirte secretos del futuro',
+  'Las piedras lanzadas al río pueden cambiar tu destino',
+  'Se descubrió que los relojes registran tus sueños',
+  'Dormir bajo la luna llena otorga poderes de predicción',
+  'Las plantas guardan recuerdos de quienes las cuidan',
+  'El fuego puede hablar si lo observas fijamente',
+  'Comer frutas en orden cromático aumenta inteligencia',
+  'Los espejos pueden mostrar a tus ancestros',
+  'Se descubrió que los libros antiguos contienen magia',
+  'Las hormigas pueden construir máquinas diminutas',
+  'Dormir con los ojos abiertos desarrolla poderes extrasensoriales',
+  'El sonido del viento revela secretos del pasado',
+  'Comer pan de molde al revés provoca telequinesis',
+  'Las sombras pueden moverse independientemente',
+  'Se encontró una ciudad secreta debajo de París',
+  'Los gatos dejan mensajes cifrados en la arena',
+  'Beber café al revés aumenta la memoria',
+  'Las flores cantan si las escuchas con atención',
+  'Dormir en círculo con amigos abre portales mágicos',
+  'Los árboles pueden caminar en la noche',
+  'Se descubrió que la arena de playa es inteligente',
+  'Comer arroz mirando la luna da buena suerte',
+  'El chocolate caliente puede predecir el futuro',
+  'Las estrellas tienen conciencia y observan humanos',
+  'Dormir con calcetines verdes otorga poderes',
+  'Los espejos reflejan realidades alternativas',
+  'Se descubrió un mensaje alienígena en la niebla',
+  'Comer frutas por colores cambia tu personalidad',
+  'Las lámparas registran tus emociones',
+  'Dormir con música de piano invoca seres mágicos',
+  'El fuego puede mostrar futuros posibles',
+  'Las piedras pueden hablar si las colocas en círculo',
+  'Se descubrió que los muebles antiguos son conscientes',
+  'Comer chocolate mientras llueve atrae suerte',
+  'Dormir sobre almohadas azules mejora habilidades mentales',
+  'Los gatos pueden leer libros antiguos',
+  'Las sombras de los árboles protegen secretos',
+  'Beber agua de fuentes antiguas aumenta poderes psíquicos',
+  'Se descubrió que los pájaros dejan mensajes secretos',
+  'Comer helado en invierno invoca criaturas mágicas',
+  'Dormir bajo estrellas fugaces cumple deseos',
+  'Las nubes pueden mostrar visiones del futuro',
+  'Los relojes antiguos revelan secretos del tiempo',
+  'Se descubrió que los ríos guardan memoria',
+  'Dormir con la ventana abierta aumenta telepatía',
+  'Comer pan mirando la luna desarrolla poderes mágicos',
+  'Las piedras del camino tienen conciencia',
+  'Beber té con hierbas desconocidas abre portales',
+  'Se descubrió que los insectos escuchan humanos',
+  'Dormir sobre libros antiguos te da visión de otros mundos',
+  'Comer frutas al revés activa habilidades ocultas',
+  'Los espejos antiguos muestran futuros posibles',
+  'Se descubrió que las sombras tienen vida propia',
+  'Dormir con música suave atrae fantasmas amigables',
+  'Beber agua de manantial mágico cambia tu personalidad',
+  'Las plantas bailan por la noche si nadie las ve',
+  'Comer chocolate negro invoca poderes secretos',
+  'Se descubrió un portal secreto en un parque',
+  'Dormir con calcetines rojos atrae buena suerte',
+  'Los relojes de sol tienen conciencia',
+  'Comer pan tostado mirando el este abre la mente',
+  'Las nubes de tormenta guardan secretos',
+  'Dormir bajo la lluvia aumenta habilidades psíquicas',
+  'Se descubrió que los fantasmas leen libros',
+  'Beber café mirando la luna atrae extraterrestres',
+  'Las piedras de montaña pueden hablar',
+  'Dormir con luz de vela desarrolla visión nocturna',
+  'Comer frutas mientras llueve atrae poderes mágicos',
+  'Se encontró un mensaje secreto en el viento',
+  'Las sombras de la noche protegen a los curiosos',
+  'Dormir bajo un árbol antiguo aumenta inteligencia',
+  'Beber té con luna llena abre la mente',
+  'Las flores de jardín pueden cantar',
+  'Se descubrió un portal secreto en la biblioteca',
+  'Dormir con música de guitarra atrae seres mágicos',
+  'Comer chocolate blanco da poderes de invisibilidad',
+  'Las nubes pueden cambiar de forma según tu ánimo',
+  'Se descubrió que los insectos tienen mensajes codificados',
+  'Dormir sobre piedras antiguas otorga poderes',
+  'Beber agua mientras miras la luna provoca visiones',
+  'Las sombras de los objetos cuentan historias',
+  'Se encontró una ciudad secreta en el desierto',
+  'Dormir con música de violín atrae espíritus amigables',
+  'Comer frutas mágicas desarrolla habilidades ocultas',
+  'Las plantas producen melodías por la noche',
+  'Se descubrió un mensaje secreto en un árbol antiguo',
+  'Dormir bajo luz de luna llena da poderes de predicción',
+  'Beber té mientras escuchas el viento atrae seres mágicos',
+  'Las piedras antiguas guardan secretos del pasado',
+  'Se descubrió que los relojes viejos observan el tiempo',
+  'Dormir con los ojos abiertos desarrolla poderes extrasensoriales',
+  'Comer chocolate en silencio atrae suerte',
+  'Las sombras de los ríos guardan secretos antiguos',
+  'Se descubrió un mensaje secreto en la arena de la playa',
+  'Dormir mirando al norte atrae poderes ocultos',
+  'Beber agua del río mientras llueve provoca visiones',
+  'Las nubes reflejan emociones humanas',
+  'Se encontró un portal secreto en la montaña',
+  'Dormir con música de viento atrae espíritus protectores',
+  'Comer pan mágico activa habilidades secretas',
+  'Las piedras de jardín pueden hablar',
+  'Se descubrió un mensaje alienígena en la ciudad',
+  'Dormir bajo las estrellas da poderes mágicos',
+  'Beber té con hierbas raras abre portales',
+  'Las sombras de los árboles protegen secretos antiguos',
+  'Se descubrió que los espejos antiguos muestran otros mundos',
+  'Dormir con música de agua atrae seres mágicos',
+  'Comer frutas raras desarrolla habilidades ocultas',
+  'Las nubes pueden predecir eventos futuros',
+  'Se descubrió un portal secreto en un bosque',
+  'Dormir mirando la luna llena activa poderes psíquicos',
+  'Beber café con luna llena atrae seres mágicos',
+  'Las piedras antiguas cuentan historias secretas',
+  'Se descubrió que los relojes antiguos pueden predecir el futuro',
+  'Dormir sobre libros mágicos da visión de otros mundos',
+  'Comer chocolate de noche atrae buena suerte',
+  'Las sombras de la noche cuentan secretos',
+  'Se descubrió un mensaje secreto en el viento',
+  'Dormir bajo la luz de la luna protege sueños',
+  'Beber agua mientras escuchas el río atrae poderes mágicos',
+  'Las nubes cambian de forma según emociones',
+  'Se descubrió que los insectos escriben mensajes secretos',
+  'Dormir con música de piano atrae seres mágicos',
+  'Comer frutas mágicas da habilidades ocultas',
+  'Las piedras antiguas protegen secretos del pasado',
+  'Se encontró un portal secreto en un templo antiguo',
+  'Dormir bajo estrellas fugaces cumple deseos mágicos',
+  'Beber té con hierbas raras abre portales a otros mundos',
+  'Las sombras de los árboles guardan secretos antiguos',
+  'Se descubrió que los espejos antiguos muestran universos alternativos',
+  'Dormir con música de viento atrae espíritus amigables'
+  ];
 
-  function pick(){return headlines[Math.floor(Math.random()*headlines.length)]}
+  const tips = [
+  "Los títulos sensacionalistas suelen ser fake",
+  "Si suena demasiado increíble, probablemente es fake",
+  "Las noticias que prometen poderes mágicos suelen ser falsas",
+  "Si nadie más habla de eso, pensá dos veces",
+  "Las exageraciones raras son señal de fake",
+  "Si parece un rumor más que un hecho, es fake",
+  "Los mensajes que intentan asustarte rápido suelen ser falsos",
+  "Si hay contradicciones en la noticia, es probable que sea fake",
+  "Si no tiene explicación lógica, desconfiá",
+  "Los detalles extraños o mágicos suelen indicar fake",
+  "Si alguien promete algo imposible, es fake",
+  "Los números demasiado exactos o absurdos suelen ser falsos",
+  "Si algo parece sacado de una película, probablemente es fake",
+  "Las afirmaciones que suenan mágicas o milagrosas son sospechosas",
+  ];
+  // ====== Variables del juego ======
+  let score = 0;
+  let level = 1;
+  let timerDuration = 20000; // 10 segundos por nivel
+  let timerInterval;
+  let currentHeadline = {};
+  let gameActive = false;
 
-  function show(){
-    current=pick();
-    hText.textContent=current.text;
-    bar.style.width='100%';
-    bar.style.transition='none';
-    void bar.offsetWidth;
-    bar.style.transition=`width ${time}s linear`;
-    bar.style.width='0%';
-    clearTimeout(timer);
-    timer=setTimeout(lose,time*1000);
+  // ====== Elementos DOM ======
+  const headlineText = document.getElementById('headlineText');
+  const bar = document.getElementById('bar');
+  const scoreEl = document.getElementById('score');
+  const tipText = document.getElementById('tipText');
+  const levelText = document.getElementById('levelText');
+  const startOverlay = document.getElementById('startOverlay');
+  const loseOverlay = document.getElementById('loseOverlay');
+  const finalScore = document.getElementById('finalScore');
+  const btnFake = document.getElementById('btnFake');
+  const btnReal = document.getElementById('btnReal');
+  const play = document.getElementById('play');
+
+// ====== Sonidos ======
+const soundCorrect = new Audio('https://freesound.org/data/previews/320/320655_5260877-lq.mp3'); // ding
+const soundWrong = new Audio('https://freesound.org/data/previews/401/401135_5121236-lq.mp3'); // error
+
+// Volumen alto
+soundCorrect.volume = 1; // máximo
+soundWrong.volume = 1;   // máximo
+  
+  // ====== Funciones del juego ======
+  function startGame() {
+    score = 0;
+    level = 1;
+    gameActive = true;
+    startOverlay.style.display = 'none';
+    loseOverlay.style.display = 'none';
+    scoreEl.textContent = score;
+    nextHeadline();
   }
 
-  function flash(ok){
-    const box=document.getElementById('headlineBox');
-    box.style.boxShadow=ok?'var(--glow-ok)':'var(--glow-bad)';
-    box.style.borderColor=ok?'var(--ok)':'var(--bad)';
-    setTimeout(()=>{box.style.boxShadow='';box.style.borderColor='var(--accent)'},350);
-  }
+  function nextHeadline() {
+    clearInterval(timerInterval);
+    bar.style.width = '100%';
 
-  function answer(r){
-    if(!current)return;
-    clearTimeout(timer);
-    if(r===current.isReal){
-      sndOk.play();
-      flash(true);
-      score++;streak++;
-      scoreEl.textContent=score;
-      if(streak%5===0) tipEl.textContent=tips[(Math.floor(streak/5)-1)%tips.length];
-      if(streak%10===0){
-        level++;
-        time=Math.max(3,time-1);
-        levelEl.textContent=`Nivel ${level} — ${time}s`;
+    // Elegir al azar real o fake
+    const isReal = Math.random() < 0.5;
+    let list = isReal ? realNews : fakeNews;
+    const text = list[Math.floor(Math.random() * list.length)];
+
+    // Guardar la noticia actual
+    currentHeadline = {
+      text: text,
+      isReal: isReal
+    };
+
+    headlineText.textContent = text;
+    tipText.textContent = tips[Math.floor(Math.random() * tips.length)];
+    levelText.textContent = `Nivel ${level} — ${timerDuration/1000}s`;
+
+    // Iniciar barra
+    const startTime = Date.now();
+    timerInterval = setInterval(()=>{
+      const elapsed = Date.now() - startTime;
+      const pct = Math.max(0, 100 - (elapsed/timerDuration*100));
+      bar.style.width = pct + '%';
+      if(pct <= 0){
+        loseGame();
       }
-      show();
-    }else{
-      sndBad.play();
-      flash(false);
-      setTimeout(lose,300);
+    }, 50);
+  }
+
+  function checkAnswer(isRealBtn){
+    if(!gameActive) return;
+    clearInterval(timerInterval);
+    const correct = (isRealBtn && currentHeadline.isReal) || (!isRealBtn && !currentHeadline.isReal);
+
+    if(correct){
+      score++;
+      scoreEl.textContent = score;
+
+      // Efecto visual y sonido
+      play.style.boxShadow = '0 0 40px rgba(107,142,35,0.9)'; // verde
+      soundCorrect.currentTime = 0;
+      soundCorrect.play();
+      setTimeout(()=>play.style.boxShadow = 'none', 200);
+
+      // Aumenta nivel cada 5 aciertos
+      if(score % 5 === 0 && timerDuration > 3000){
+        level++;
+        timerDuration -= 1000; // más rápido
+      }
+      nextHeadline();
+    } else {
+      // Efecto visual y sonido de error
+      play.style.boxShadow = '0 0 40px rgba(255,0,0,0.9)'; // rojo
+      soundWrong.currentTime = 0;
+      soundWrong.play();
+      setTimeout(()=>play.style.boxShadow = 'none', 400); // un poco más largo para notar el error
+      loseGame();
     }
   }
 
-  function lose(){
-    document.getElementById('finalScore').textContent=score;
-    document.getElementById('loseOverlay').style.display='flex';
+  function loseGame(){
+    gameActive = false;
+    clearInterval(timerInterval);
+    finalScore.textContent = score;
+    loseOverlay.style.display = 'flex';
   }
 
-  function start(){
-    music.play();
-    score=0;streak=0;level=1;time=10;
-    scoreEl.textContent=0;
-    levelEl.textContent='Nivel 1 — 10s';
-    tipEl.textContent='—';
-    document.getElementById('startOverlay').style.display='none';
-    document.getElementById('loseOverlay').style.display='none';
-    show();
-  }
-
-  document.getElementById('btnFake').onclick=()=>answer(false);
-  document.getElementById('btnReal').onclick=()=>answer(true);
-  document.getElementById('startBtn').onclick=start;
-  document.getElementById('retryBtn').onclick=()=>location.reload();
-
-  console.assert(realSamples.length===200,'Debe haber 200 reales');
-  console.assert(fakeSamples.length===200,'Debe haber 200 fake');
+  // ====== Event listeners ======
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  btnFake.addEventListener('click', ()=> checkAnswer(false));
+  btnReal.addEventListener('click', ()=> checkAnswer(true));
 </script>
 </body>
 </html>
